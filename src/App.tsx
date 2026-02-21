@@ -303,7 +303,7 @@ export default function App() {
             <p className="text-sm font-medium">সময়গুলো প্রতিদিন পরিবর্তিত হতে পারে। আপনার এলাকার সঠিক সময় অনুযায়ী ইফতার করুন।</p>
           </div>
           <p className="text-sm text-slate-400 font-bold">
-            &copy; {toBnDigits(p.y)} বাংলাদেশ স্ট্যান্ডার্ড টাইম (UTC+6)
+            &copy; Rakibul Hasan Tuhin
           </p>
         </footer>
       </div>
