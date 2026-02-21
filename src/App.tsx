@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Clock, MapPin, Calendar, Info, Timer } from 'lucide-react';
+import { Clock, MapPin, Calendar, Info, Timer, Send } from 'lucide-react';
 import { supabase } from './lib/supabase';
 
 // --- Constants & Types ---
@@ -294,17 +294,50 @@ export default function App() {
               </div>
             </div>
           </AnimatePresence>
+          {/* Mobile Footer - Only visible after scrolling on mobile */}
+          <footer className="md:hidden mt-12 pb-10 flex flex-col items-center gap-4 px-6">
+            <div className="flex items-center gap-2 text-amber-700/80 text-center">
+              <Info size={12} className="shrink-0" />
+              <p className="text-[10px] font-medium">সময়গুলো প্রতিদিন পরিবর্তিত হতে পারে। আপনার এলাকার সঠিক সময় অনুযায়ী ইফতার করুন।</p>
+            </div>
+            
+            <a 
+              href="https://t.me/tuhinextapkbuilder" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-1.5 bg-[#24A1DE] text-white rounded-full text-[10px] font-bold hover:bg-[#1d86b9] transition-colors shadow-sm"
+            >
+              <Send size={12} />
+              Telegram Channel
+            </a>
+            
+            <p className="text-[10px] text-slate-400 font-bold">
+              &copy; Rakibul Hasan Tuhin
+            </p>
+          </footer>
         </main>
 
-        {/* Minimal Footer - Full Width */}
-        <footer className="px-12 py-4 bg-slate-50/90 border-t border-slate-200/60 flex items-center justify-between shrink-0">
+        {/* Desktop Footer - Hidden on mobile */}
+        <footer className="hidden md:flex px-12 py-4 bg-slate-50/90 border-t border-slate-200/60 items-center justify-between gap-4 shrink-0">
           <div className="flex items-center gap-3 text-amber-700">
-            <Info size={16} />
+            <Info size={16} className="shrink-0" />
             <p className="text-sm font-medium">সময়গুলো প্রতিদিন পরিবর্তিত হতে পারে। আপনার এলাকার সঠিক সময় অনুযায়ী ইফতার করুন।</p>
           </div>
-          <p className="text-sm text-slate-400 font-bold">
-            &copy; Rakibul Hasan Tuhin
-          </p>
+          
+          <div className="flex items-center gap-4">
+            <a 
+              href="https://t.me/tuhinextapkbuilder" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-1.5 bg-[#24A1DE] text-white rounded-full text-xs font-bold hover:bg-[#1d86b9] transition-colors shadow-sm"
+            >
+              <Send size={14} />
+              Telegram Channel
+            </a>
+            <p className="text-sm text-slate-400 font-bold">
+              &copy; Rakibul Hasan Tuhin
+            </p>
+          </div>
         </footer>
       </div>
     </div>
