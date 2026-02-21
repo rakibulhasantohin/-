@@ -7,7 +7,8 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   global: {
-    // Explicitly use the native fetch to avoid "Cannot set property fetch of #<Window>" errors
-    fetch: (url, options) => window.fetch(url, options),
+    // Use the global fetch directly. 
+    // This avoids any potential issues with property assignment in sandboxed environments.
+    fetch: globalThis.fetch,
   },
 });
