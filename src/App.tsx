@@ -98,29 +98,29 @@ const CountdownCard = ({ division, nowUtcMs }: { division: Division; nowUtcMs: n
       layout
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-white/90 backdrop-blur-sm rounded-xl border border-slate-200 p-3 flex flex-col justify-between hover:bg-white transition-all shadow-sm h-full"
+      className="bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200 p-4 flex flex-col justify-between hover:bg-white transition-all shadow-md h-full"
     >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <div className="p-1 bg-emerald-100 text-emerald-700 rounded-lg">
-            <MapPin size={12} />
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl">
+            <MapPin size={18} />
           </div>
-          <h3 className="font-bold text-xs text-slate-800">{division.name}</h3>
+          <h3 className="font-black text-lg text-slate-800">{division.name}</h3>
         </div>
         <div className="text-right">
-          <span className="text-[8px] text-slate-400 font-bold uppercase block leading-none">ইফতার</span>
-          <span className="font-black text-slate-700 text-xs">{format12h(division.iftar)}</span>
+          <span className="text-[10px] text-slate-400 font-bold uppercase block leading-none mb-1">ইফতার</span>
+          <span className="font-black text-slate-700 text-sm md:text-base">{format12h(division.iftar)}</span>
         </div>
       </div>
       
-      <div className={`px-2 py-1.5 rounded-lg flex flex-col items-center ${isAfterIftar ? 'bg-amber-50 border border-amber-100' : 'bg-emerald-50 border border-emerald-100'}`}>
-        <span className="text-[8px] font-bold text-slate-500 uppercase tracking-tighter mb-0.5">
+      <div className={`px-3 py-2.5 rounded-xl flex flex-col items-center ${isAfterIftar ? 'bg-amber-50 border border-amber-100' : 'bg-emerald-50 border border-emerald-100'}`}>
+        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mb-1">
           {isAfterIftar ? 'আগামীকাল বাকি' : 'বাকি সময়'}
         </span>
-        <div className="text-sm font-black text-slate-900 flex gap-1 leading-none">
-          <span>{toBnDigits(h)}<small className="text-[9px] ml-0.5 opacity-60">ঘণ্টা</small></span>
-          <span>{toBnDigits(pad2(m))}<small className="text-[9px] ml-0.5 opacity-60">মিনিট</small></span>
-          <span>{toBnDigits(pad2(s))}<small className="text-[9px] ml-0.5 opacity-60">সেকেন্ড</small></span>
+        <div className="text-lg md:text-xl font-black text-slate-900 flex gap-1.5 leading-none">
+          <span>{toBnDigits(h)}<small className="text-xs ml-0.5 opacity-60">ঘণ্টা</small></span>
+          <span>{toBnDigits(pad2(m))}<small className="text-xs ml-0.5 opacity-60">মিনিট</small></span>
+          <span>{toBnDigits(pad2(s))}<small className="text-xs ml-0.5 opacity-60">সেকেন্ড</small></span>
         </div>
       </div>
     </motion.div>
@@ -211,8 +211,8 @@ export default function App() {
           </div>
         </header>
 
-        {/* Content Area - Optimized for Full Screen */}
-        <main className="flex-1 px-12 py-6 flex flex-col gap-6 overflow-hidden justify-center items-center">
+        {/* Content Area - Optimized for Full Screen & Responsive */}
+        <main className="flex-1 px-6 md:px-12 py-6 flex flex-col gap-6 overflow-y-auto lg:overflow-hidden justify-start lg:justify-center items-center">
           {loading && (
             <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center">
               <div className="flex flex-col items-center gap-4">
@@ -232,7 +232,7 @@ export default function App() {
                 key={isTomorrow ? 'tomorrow' : 'today'}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-4xl md:text-5xl font-black text-slate-800 mb-4 drop-shadow-sm text-center"
+                className="text-3xl md:text-5xl font-black text-slate-800 mb-2 md:mb-4 drop-shadow-sm text-center"
               >
                 {isTomorrow ? "আগামীকালের ইফতারের সময়সূচি" : "আজকে ইফতারের সময়সূচি"}
               </motion.h2>
@@ -243,56 +243,54 @@ export default function App() {
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center items-center gap-12 mb-8"
+            className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12 mb-4 md:mb-8"
           >
-            <div className="text-center">
+            <div className="text-center order-2 md:order-1">
               <p className="text-xs uppercase font-bold text-slate-400 tracking-widest leading-none mb-2">আজকের তারিখ</p>
-              <p className="text-lg font-bold text-slate-700 bg-white/90 px-6 py-2 rounded-full border border-slate-200 shadow-md">{formattedDate}</p>
+              <p className="text-base md:text-lg font-bold text-slate-700 bg-white/90 px-6 py-2 rounded-full border border-slate-200 shadow-md">{formattedDate}</p>
             </div>
 
             {ramadanDate && (
-              <div className="flex flex-col items-center pt-4">
-                <span className="bg-emerald-600 text-white px-10 py-4 rounded-full text-2xl font-black shadow-xl shadow-emerald-200 border border-emerald-500">
+              <div className="flex flex-col items-center pt-2 md:pt-4 order-1 md:order-2">
+                <span className="bg-emerald-600 text-white px-8 md:px-10 py-3 md:py-4 rounded-full text-xl md:text-2xl font-black shadow-xl shadow-emerald-200 border border-emerald-500">
                   {ramadanDate}
                 </span>
               </div>
             )}
 
-            <div className="text-center">
+            <div className="text-center order-3">
               <p className="text-xs uppercase font-bold text-slate-400 tracking-widest leading-none mb-2">বর্তমান সময়</p>
-              <p className="text-lg font-bold text-slate-700 bg-white/90 px-6 py-2 rounded-full border border-slate-200 shadow-md">{formattedTime}</p>
+              <p className="text-base md:text-lg font-bold text-slate-700 bg-white/90 px-6 py-2 rounded-full border border-slate-200 shadow-md">{formattedTime}</p>
             </div>
           </motion.div>
 
           <AnimatePresence mode="popLayout">
             <div className="w-full max-w-[1600px] flex flex-col gap-6">
-              {/* Row 1: 3 Items */}
-              <div className="grid grid-cols-3 gap-6">
-                {row1.map((div) => (
-                  <div key={div.name} className="h-32 md:h-40">
+              {/* Main Grid for first 6 items (and all items on mobile/tablet) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {divisions.slice(0, 6).map((div) => (
+                  <div key={div.name} className="h-36 md:h-40">
                     <CountdownCard division={div} nowUtcMs={nowUtcMs} />
                   </div>
                 ))}
-              </div>
-              
-              {/* Row 2: 3 Items */}
-              <div className="grid grid-cols-3 gap-6">
-                {row2.map((div) => (
-                  <div key={div.name} className="h-32 md:h-40">
-                    <CountdownCard division={div} nowUtcMs={nowUtcMs} />
-                  </div>
-                ))}
-              </div>
-
-              {/* Row 3: 2 Items (Centered) */}
-              <div className="grid grid-cols-3 gap-6">
-                <div className="col-start-1 col-span-3 flex justify-center gap-6">
-                  {row3.map((div) => (
-                    <div key={div.name} className="w-1/3 h-32 md:h-40">
+                
+                {/* On mobile and tablet, show the remaining 2 items in the same grid flow */}
+                <div className="contents lg:hidden">
+                  {divisions.slice(6, 8).map((div) => (
+                    <div key={div.name} className="h-36 md:h-40">
                       <CountdownCard division={div} nowUtcMs={nowUtcMs} />
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* On Desktop (LG screens), show the last 2 items centered in a separate row */}
+              <div className="hidden lg:flex justify-center gap-6">
+                {divisions.slice(6, 8).map((div) => (
+                  <div key={div.name} className="h-36 md:h-40 w-[calc(33.333%-1rem)]">
+                    <CountdownCard division={div} nowUtcMs={nowUtcMs} />
+                  </div>
+                ))}
               </div>
             </div>
           </AnimatePresence>
