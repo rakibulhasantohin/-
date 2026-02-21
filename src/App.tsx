@@ -194,9 +194,9 @@ export default function App() {
   const row3 = divisions.slice(6, 8); // Rangpur, Mymensingh
 
   return (
-    <div className="h-screen w-screen bg-slate-50 text-slate-900 font-sans overflow-hidden flex flex-col">
+    <div className="h-[100dvh] w-screen bg-slate-50 text-slate-900 font-sans overflow-hidden flex flex-col">
       {/* Edge-to-Edge Full Screen Container */}
-      <div className="flex-1 flex flex-col bg-white/30 backdrop-blur-xl relative">
+      <div className="flex-1 flex flex-col bg-white/30 backdrop-blur-xl relative overflow-hidden">
         {/* Compact Header - Full Width */}
         <header className="px-8 py-4 flex items-center justify-center border-b border-slate-200/60 bg-white/80 shrink-0 shadow-sm">
           <div className="flex items-center gap-3">
@@ -212,7 +212,7 @@ export default function App() {
         </header>
 
         {/* Content Area - Optimized for Full Screen & Responsive */}
-        <main className="flex-1 px-6 md:px-12 py-6 flex flex-col gap-6 overflow-y-auto lg:overflow-hidden justify-start lg:justify-center items-center">
+        <main className="flex-1 px-6 md:px-12 py-6 flex flex-col gap-6 overflow-y-auto lg:overflow-y-hidden justify-start lg:justify-center items-center scrollbar-thin scrollbar-thumb-slate-200">
           {loading && (
             <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center">
               <div className="flex flex-col items-center gap-4">
@@ -265,7 +265,7 @@ export default function App() {
           </motion.div>
 
           <AnimatePresence mode="popLayout">
-            <div className="w-full max-w-[1600px] flex flex-col gap-6">
+            <div className="w-full max-w-[1600px] flex flex-col gap-6 pb-12 lg:pb-0">
               {/* Main Grid for first 6 items (and all items on mobile/tablet) */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {divisions.slice(0, 6).map((div) => (
