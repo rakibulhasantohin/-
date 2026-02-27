@@ -21,19 +21,39 @@ const BN_MONTHS = [
 
 interface Division {
   name: string;
-  iftar: string; // HH:MM
+  baseOffset: number; // Minutes relative to Dhaka
 }
 
-const FALLBACK_DIVISIONS: Division[] = [
-  { name: "ঢাকা বিভাগ", iftar: "18:00" },
-  { name: "চট্টগ্রাম বিভাগ", iftar: "17:55" },
-  { name: "রাজশাহী বিভাগ", iftar: "18:05" },
-  { name: "খুলনা বিভাগ", iftar: "18:04" },
-  { name: "বরিশাল বিভাগ", iftar: "18:01" },
-  { name: "সিলেট বিভাগ", iftar: "17:53" },
-  { name: "রংপুর বিভাগ", iftar: "18:03" },
-  { name: "ময়মনসিংহ বিভাগ", iftar: "17:59" },
+const DIVISIONS_CONFIG: Division[] = [
+  { name: "ঢাকা বিভাগ", baseOffset: 0 },
+  { name: "চট্টগ্রাম বিভাগ", baseOffset: -5 },
+  { name: "রাজশাহী বিভাগ", baseOffset: 6 },
+  { name: "খুলনা বিভাগ", baseOffset: 4 },
+  { name: "বরিশাল বিভাগ", baseOffset: 1 },
+  { name: "সিলেট বিভাগ", baseOffset: -7 },
+  { name: "রংপুর বিভাগ", baseOffset: 3 },
+  { name: "ময়মনসিংহ বিভাগ", baseOffset: -1 },
 ];
+
+// Base date for calculation: Feb 27, 2026
+// Base Dhaka Iftar time on Feb 27: 18:02
+const BASE_DATE_MS = Date.UTC(2026, 1, 27); // Feb 27, 2026 UTC
+const BASE_DHAKA_MINUTES = 18 * 60 + 2;
+
+function getIftarTimeForDivision(division: Division, date: Date): string {
+  // Calculate days difference from Feb 27, 2026
+  const currentMidnightUtc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  const diffDays = Math.floor((currentMidnightUtc - BASE_DATE_MS) / (24 * 60 * 60 * 1000));
+  
+  // Increment 1 minute every 2 days
+  const minutesToAdd = Math.floor(diffDays / 2);
+  
+  const totalMinutes = BASE_DHAKA_MINUTES + minutesToAdd + division.baseOffset;
+  const finalH = Math.floor(totalMinutes / 60);
+  const finalM = totalMinutes % 60;
+  
+  return `${pad2(finalH)}:${pad2(finalM)}`;
+}
 
 // --- Utilities ---
 
@@ -83,9 +103,21 @@ function format12h(hhmm: string): string {
 // --- Components ---
 
 const CountdownCard = ({ division, nowUtcMs }: { division: Division; nowUtcMs: number; key?: string }) => {
-  const targetTodayUtc = getTargetUtcMs(division.iftar, 0);
+  const now = new Date(nowUtcMs + BD_OFFSET_MS);
+  const iftarToday = getIftarTimeForDivision(division, now);
+  
+  const targetTodayUtc = getTargetUtcMs(iftarToday, 0);
   const isAfterIftar = nowUtcMs >= targetTodayUtc;
-  const targetUtc = isAfterIftar ? getTargetUtcMs(division.iftar, 1) : targetTodayUtc;
+  
+  // If after iftar, get tomorrow's time
+  let finalIftar = iftarToday;
+  let targetUtc = targetTodayUtc;
+  
+  if (isAfterIftar) {
+    const tomorrow = new Date(nowUtcMs + BD_OFFSET_MS + 24 * 60 * 60 * 1000);
+    finalIftar = getIftarTimeForDivision(division, tomorrow);
+    targetUtc = getTargetUtcMs(finalIftar, 1);
+  }
   
   const diffMs = Math.max(0, targetUtc - nowUtcMs);
   const totalSeconds = Math.floor(diffMs / 1000);
@@ -109,7 +141,7 @@ const CountdownCard = ({ division, nowUtcMs }: { division: Division; nowUtcMs: n
         </div>
         <div className="text-right">
           <span className="text-[10px] text-slate-400 font-bold uppercase block leading-none mb-1">ইফতার</span>
-          <span className="font-black text-slate-700 text-sm md:text-base">{format12h(division.iftar)}</span>
+          <span className="font-black text-slate-700 text-sm md:text-base">{format12h(finalIftar)}</span>
         </div>
       </div>
       
@@ -129,36 +161,16 @@ const CountdownCard = ({ division, nowUtcMs }: { division: Division; nowUtcMs: n
 
 export default function App() {
   const [nowUtcMs, setNowUtcMs] = useState(Date.now());
-  const [divisions, setDivisions] = useState<Division[]>(FALLBACK_DIVISIONS);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchDivisions = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('divisions')
-          .select('name, iftar')
-          .order('id', { ascending: true });
-
-        if (error) throw error;
-        if (data && data.length > 0) {
-          setDivisions(data);
-        }
-      } catch (err) {
-        console.error('Error fetching from Supabase:', err);
-        // Fallback is already set in state
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDivisions();
-
     const timer = setInterval(() => {
       setNowUtcMs(Date.now());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const divisions = DIVISIONS_CONFIG;
 
   const bdNow = useMemo(() => new Date(nowUtcMs + BD_OFFSET_MS), [nowUtcMs]);
   const p = useMemo(() => getBdDateParts(bdNow), [bdNow]);
@@ -169,13 +181,16 @@ export default function App() {
   const formattedDate = `${toBnDigits(p.d)} ${BN_MONTHS[p.m]} ${toBnDigits(p.y)}`;
 
   // Ramadan Calculation for 2026 (Start: Feb 19, 2026)
-  const ramadanDate = useMemo(() => {
+  const ramadanInfo = useMemo(() => {
     const start = new Date(2026, 1, 19).getTime(); // Feb 19, 2026
     const today = new Date(p.y, p.m, p.d).getTime();
     let diffDays = Math.floor((today - start) / (24 * 60 * 60 * 1000)) + 1;
     
     // Update to next Ramadan day after all Iftars are done for today
-    const allIftars = divisions.map(d => getTargetUtcMs(d.iftar, 0));
+    const allIftars = divisions.map(d => {
+      const time = getIftarTimeForDivision(d, bdNow);
+      return getTargetUtcMs(time, 0);
+    });
     const maxIftarMs = Math.max(...allIftars);
     
     if (nowUtcMs >= maxIftarMs) {
@@ -183,10 +198,18 @@ export default function App() {
     }
 
     if (diffDays >= 1 && diffDays <= 30) {
-      return `${toBnDigits(diffDays)} তম রমজান`;
+      let ashra = "";
+      if (diffDays <= 10) ashra = "রহমতের";
+      else if (diffDays <= 20) ashra = "মাগফিরাতের";
+      else ashra = "নাজাতের";
+      
+      return {
+        day: `${toBnDigits(diffDays)} তম রমজান`,
+        ashra: ashra
+      };
     }
     return null;
-  }, [p.y, p.m, p.d, nowUtcMs, divisions]);
+  }, [p.y, p.m, p.d, nowUtcMs, divisions, bdNow]);
 
   // Grouping divisions as requested
   const row1 = divisions.slice(0, 3); // Dhaka, Chittagong, Rajshahi
@@ -224,7 +247,10 @@ export default function App() {
 
           {/* Dynamic Title - Larger for Full Screen */}
           {(() => {
-            const allIftars = divisions.map(d => getTargetUtcMs(d.iftar, 0));
+            const allIftars = divisions.map(d => {
+              const time = getIftarTimeForDivision(d, bdNow);
+              return getTargetUtcMs(time, 0);
+            });
             const maxIftarMs = Math.max(...allIftars);
             const isTomorrow = nowUtcMs >= maxIftarMs;
             return (
@@ -250,10 +276,13 @@ export default function App() {
               <p className="text-base md:text-lg font-bold text-slate-700 bg-white/90 px-6 py-2 rounded-full border border-slate-200 shadow-md">{formattedDate}</p>
             </div>
 
-            {ramadanDate && (
+            {ramadanInfo && (
               <div className="flex flex-col items-center pt-2 md:pt-4 order-1 md:order-2">
+                <p className="text-xs uppercase font-bold text-emerald-600 tracking-[0.2em] leading-none mb-3 drop-shadow-sm">
+                  {ramadanInfo.ashra} ১০ দিন
+                </p>
                 <span className="bg-emerald-600 text-white px-8 md:px-10 py-3 md:py-4 rounded-full text-xl md:text-2xl font-black shadow-xl shadow-emerald-200 border border-emerald-500">
-                  {ramadanDate}
+                  {ramadanInfo.day}
                 </span>
               </div>
             )}
